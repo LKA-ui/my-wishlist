@@ -156,7 +156,7 @@
 async function fetchItemMetadata(targetUrl) {
     // Replace 'your-vercel-project-name' with your actual Vercel domain once deployed
     // For local testing, Vercel gives you a local URL, but we will use the live one here
-    const vercelApiUrl = `https://your-vercel-project-name.vercel.app/api/unfurl?url=${encodeURIComponent(targetUrl)}`;
+    const vercelApiUrl = `https://my-wishlist-three.vercel.app/api/unfurl?url=${encodeURIComponent(targetUrl)}`;
     
     try {
         const response = await fetch(vercelApiUrl);
