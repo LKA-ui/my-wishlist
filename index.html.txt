@@ -206,7 +206,7 @@
         // Copy button handling
         shareBtn.addEventListener('click', () => {
             navigator.clipboard.writeText(window.location.href);
-            alert("📋 Shareable wishlist link copied to clipboard! Send it to anyone.");
+            alert("📋 Shareable wishlist link copied to clipboard! Send it to any and everyone.");
         });
 
         // Auto-run on startup
