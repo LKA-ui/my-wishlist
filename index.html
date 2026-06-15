@@ -193,7 +193,7 @@ async function fetchItemMetadata(targetUrl) {
             });
         }
 
-        // --- Step 5: Setup Action Listeners ---
+        // --- Setup Action Listeners ---
         addBtn.addEventListener('click', async () => {
             const rawUrl = urlInput.value.trim();
             if (!rawUrl) return alert("Please paste a link first!");
@@ -201,7 +201,18 @@ async function fetchItemMetadata(targetUrl) {
             addBtn.textContent = "Loading...";
             addBtn.disabled = true;
 
-            const newItem = await fetchItemMetadata(rawUrl);
+            let newItem = await fetchItemMetadata(rawUrl);
+            
+            // If the scraper got blocked or returned a default fallback image, ask the user manually
+            if (newItem.title.startsWith("Item from") || newItem.image.includes("unsplash.com")) {
+                const userTitle = prompt("We couldn't auto-grab the details (the store might be blocking scrapers). What is the name of this item?", "");
+                if (userTitle) {
+                    newItem.title = userTitle;
+                    const userImg = prompt("Optional: Paste an image address/URL for this item:", "");
+                    if (userImg) newItem.image = userImg;
+                }
+            }
+
             wishlist.push(newItem);
             
             renderWishlist();
