@@ -152,19 +152,28 @@
             shareBtn.style.display = 'block';
         }
 
-        // --- Step 3: Fetching Web Data ---
-        async function fetchItemMetadata(targetUrl) {
-            // Placeholder fallback logic since standard browser security blocks direct cross-site scraping
-            // This assigns generic names/mock images using the domain name to simulate our feature
-            let domain = "Product Link";
-            try { domain = new URL(targetUrl).hostname.replace('www.', ''); } catch(e){}
-
-            return {
-                title: `Awesome Item from ${domain}`,
-                image: `https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop`, // Generic crisp product photo placeholder
-                url: targetUrl
-            };
-        }
+        // --- Step 3: Fetching Web Data from our Vercel API ---
+async function fetchItemMetadata(targetUrl) {
+    // Replace 'your-vercel-project-name' with your actual Vercel domain once deployed
+    // For local testing, Vercel gives you a local URL, but we will use the live one here
+    const vercelApiUrl = `https://your-vercel-project-name.vercel.app/api/unfurl?url=${encodeURIComponent(targetUrl)}`;
+    
+    try {
+        const response = await fetch(vercelApiUrl);
+        if (!response.ok) throw new Error('Network error');
+        return await response.json();
+    } catch (error) {
+        console.error("API failed, falling back to basic parsing", error);
+        // Fallback if the scraper fails on a specific tough website
+        let domain = "Product Link";
+        try { domain = new URL(targetUrl).hostname.replace('www.', ''); } catch(e){}
+        return {
+            title: `Item from ${domain}`,
+            image: `https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500`,
+            url: targetUrl
+        };
+    }
+}
 
         // --- Step 4: UI Painting Logic ---
         function renderWishlist() {
