@@ -96,7 +96,7 @@
 </head>
 <body>
 
-    <h1>🎁 My Shared Wishlist</h1>
+    <h1>🐢 My Shared Wishlist</h1>
     
     <div class="input-section" id="admin-panel">
         <input type="text" id="url-input" placeholder="Paste product web link here...">
@@ -169,7 +169,7 @@ async function fetchItemMetadata(targetUrl) {
         try { domain = new URL(targetUrl).hostname.replace('www.', ''); } catch(e){}
         return {
             title: `Item from ${domain}`,
-            image: `https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500`,
+            image: `images.unsplash.com/photo-1523275335684-37898b6baf30?w=500`,
             url: targetUrl
         };
     }
