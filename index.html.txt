@@ -2,10 +2,215 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Shared Wishlist</title>
+    <style>
+        /* --- Clean, Modern Styling --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 { text-align: center; color: #2c3e50; }
+        
+        .input-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button:hover { background-color: #0056b3; }
+        #share-btn { background-color: #28a745; margin-bottom: 20px; display: none; width: 100%; }
+        #share-btn:hover { background-color: #218838; }
+
+        /* --- Wishlist Grid Layout --- */
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #eee;
+        }
+        .card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: #eaeaea;
+        }
+        .card-content {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .card-link {
+            display: inline-block;
+            text-align: center;
+            background-color: #f1f3f5;
+            color: #007bff;
+            text-decoration: none;
+            padding: 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .card-link:hover { background-color: #e2e6ea; }
+    </style>
 </head>
 <body>
-    <h1>My Future Wishlist Website</h1>
-    <p>It works! Next up, we will code the link-grabbing logic.</p>
+
+    <h1>🎁 My Shared Wishlist</h1>
+    
+    <div class="input-section" id="admin-panel">
+        <input type="text" id="url-input" placeholder="Paste product web link here...">
+        <button id="add-btn">Add Item</button>
+    </div>
+
+    <button id="share-btn">🔗 Copy Shareable Wishlist Link</button>
+
+    <div class="wishlist-grid" id="wishlist-display"></div>
+
+    <script>
+        // --- Core Application State ---
+        let wishlist = [];
+
+        // Grab layout elements
+        const urlInput = document.getElementById('url-input');
+        const addBtn = document.getElementById('add-btn');
+        const shareBtn = document.getElementById('share-btn');
+        const wishlistDisplay = document.getElementById('wishlist-display');
+        const adminPanel = document.getElementById('admin-panel');
+
+        // --- Step 2: The "No-Database" URL Logic ---
+        // Reads the URL bar to see if data was shared to us
+        function loadWishlistFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const dataParam = params.get('list');
+            
+            if (dataParam) {
+                try {
+                    // Decode the Base64 data string back into an array
+                    wishlist = JSON.parse(atob(dataParam));
+                    // Hide the input fields if someone is just viewing a shared link
+                    adminPanel.style.display = 'none';
+                    renderWishlist();
+                } catch (e) {
+                    console.error("Error parsing shared link data.", e);
+                }
+            }
+        }
+
+        // Encodes the current wishlist items directly into the browser URL
+        function updateBrowserURL() {
+            if (wishlist.length === 0) return;
+            
+            // Convert list array into a safe string string (Base64)
+            const encryptedData = btoa(JSON.stringify(wishlist));
+            
+            // Push it to the address bar without reloading the browser page
+            const newUrl = `${window.location.origin}${window.location.pathname}?list=${encryptedData}`;
+            window.history.pushState({ path: newUrl }, '', newUrl);
+            
+            // Show the copy-link button if we have items
+            shareBtn.style.display = 'block';
+        }
+
+        // --- Step 3: Fetching Web Data ---
+        async function fetchItemMetadata(targetUrl) {
+            // Placeholder fallback logic since standard browser security blocks direct cross-site scraping
+            // This assigns generic names/mock images using the domain name to simulate our feature
+            let domain = "Product Link";
+            try { domain = new URL(targetUrl).hostname.replace('www.', ''); } catch(e){}
+
+            return {
+                title: `Awesome Item from ${domain}`,
+                image: `https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop`, // Generic crisp product photo placeholder
+                url: targetUrl
+            };
+        }
+
+        // --- Step 4: UI Painting Logic ---
+        function renderWishlist() {
+            wishlistDisplay.innerHTML = ''; // Wipe old elements
+            
+            wishlist.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="${item.image}" alt="Product image">
+                    <div class="card-content">
+                        <p class="card-title">${item.title}</p>
+                        <a href="${item.url}" target="_blank" class="card-link">View Product →</a>
+                    </div>
+                `;
+                wishlistDisplay.appendChild(card);
+            });
+        }
+
+        // --- Step 5: Setup Action Listeners ---
+        addBtn.addEventListener('click', async () => {
+            const rawUrl = urlInput.value.trim();
+            if (!rawUrl) return alert("Please paste a link first!");
+
+            addBtn.textContent = "Loading...";
+            addBtn.disabled = true;
+
+            const newItem = await fetchItemMetadata(rawUrl);
+            wishlist.push(newItem);
+            
+            renderWishlist();
+            updateBrowserURL();
+
+            urlInput.value = ''; // Reset input field
+            addBtn.textContent = "Add Item";
+            addBtn.disabled = false;
+        });
+
+        // Copy button handling
+        shareBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(window.location.href);
+            alert("📋 Shareable wishlist link copied to clipboard! Send it to anyone.");
+        });
+
+        // Auto-run on startup
+        loadWishlistFromURL();
+    </script>
 </body>
 </html>
