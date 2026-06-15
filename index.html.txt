@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Shared Wishlist</title>
+</head>
+<body>
+    <h1>My Future Wishlist Website</h1>
+    <p>It works! Next up, we will code the link-grabbing logic.</p>
+</body>
+</html>
